@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.studentservice.R
 import com.example.studentservice.databinding.LoginFragmentBinding
+import com.example.studentservice.util.Resource
 import com.example.studentservice.viewmodel.LoginViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -41,18 +42,30 @@ class LoginFragment : Fragment() {
 
         viewModel.loginLiveData.observe(viewLifecycleOwner) {
 
-            if (it == "notEnabled") {
-                Toast.makeText(
-                    requireContext(),
-                    "Please, click the link to confirm your email",
-                    Toast.LENGTH_SHORT
-                ).show()
-            } else if (it == "success") {
-                startActivity(Intent(requireContext(), MainActivity::class.java))
-            } else if (it == "error") {
-                Toast.makeText(requireContext(), "Student can't be found", Toast.LENGTH_LONG)
-                    .show();
+            when (it) {
+                is Resource.Loading -> {
+                    binding.progressBar.visibility = View.VISIBLE;
+                }
+                is Resource.Success -> {
+                    binding.progressBar.visibility = View.GONE;
+                    Log.e("Bekzhan login status", it.data!!);
+                    if (it.data == "notEnabled") {
+                        Toast.makeText(
+                            requireContext(),
+                            "Please, click the link to confirm your email",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else if (it.data == "success") {
+                        startActivity(Intent(requireContext(), MainActivity::class.java))
+                    }
+                }
+                is Resource.Error -> {
+                    binding.progressBar.visibility = View.GONE;
+                    Toast.makeText(requireContext(), "Failed ${it.message}", Toast.LENGTH_SHORT)
+                        .show()
+                }
             }
+
 
         }
 
@@ -97,6 +110,8 @@ class LoginFragment : Fragment() {
         super.onDestroy()
         _binding = null;
     }
+
+
 
 
 }

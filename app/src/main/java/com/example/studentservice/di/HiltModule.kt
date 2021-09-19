@@ -22,8 +22,8 @@ object HiltModule {
 
     @Provides
     fun provideOkHttpClient() = OkHttpClient.Builder()
-        .callTimeout(60L, TimeUnit.SECONDS)
-        .connectTimeout(60L, TimeUnit.SECONDS)
+        .readTimeout(60L,TimeUnit.SECONDS)
+        .writeTimeout(60L,TimeUnit.SECONDS)
         .build();
 
     @Provides
@@ -41,6 +41,8 @@ object HiltModule {
     @Provides
     @Singleton
     fun provideStudentService(retrofit: Retrofit) = retrofit.create(StudentService::class.java)
+
+
 
 
 }

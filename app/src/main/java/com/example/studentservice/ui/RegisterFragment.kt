@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.studentservice.R
 import com.example.studentservice.databinding.RegisterFragmentBinding
 import com.example.studentservice.entities.Student
+import com.example.studentservice.util.Resource
 import com.example.studentservice.viewmodel.LoginViewModel
 import com.google.android.material.textfield.TextInputLayout
 import dagger.hilt.android.AndroidEntryPoint
@@ -41,29 +42,52 @@ class RegisterFragment : Fragment() {
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.btnRegister.setOnClickListener() {
+        binding.btnRegister.setOnClickListener {
             studentRegister();
         }
+        observingRegisterLiveData()
+        binding.viewSignIn.setOnClickListener {
+            activity?.supportFragmentManager!!.beginTransaction()
+                .replace(R.id.container, LoginFragment()).addToBackStack(null).commit();
+        }
+    }
 
+    private fun observingRegisterLiveData() {
         viewModel.registerLiveData.observe(viewLifecycleOwner) {
-
-            if (it == "success") {
-                Toast.makeText(
-                    requireContext(),
-                    "Confirmation Link sent to ${binding.textInputEmail.editText?.text.toString()}",
-                    Toast.LENGTH_SHORT
-                ).show()
-                Thread {
-                    Thread.sleep(3000L)
-                    requireActivity().supportFragmentManager.beginTransaction()
-                        .replace(R.id.container, LoginFragment()).commit();
+            when (it) {
+                is Resource.Success -> {
+                    binding.progressBar.visibility=View.GONE;
+                    if (it.data == "success") {
+                        Toast.makeText(
+                            requireContext(),
+                            "Confirmation Link sent to ${binding.textInputEmail.editText?.text.toString()}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        Thread {
+                            Thread.sleep(3000L)
+                            requireActivity().supportFragmentManager.beginTransaction()
+                                .replace(R.id.container, LoginFragment()).commit();
+                        }
+                    } else if (it.data == "exist") {
+                        Toast.makeText(requireContext(), "Email is not available", Toast.LENGTH_SHORT)
+                            .show()
+                    }
                 }
-            } else if (it == "exist") {
-                Toast.makeText(requireContext(), "Email is not available", Toast.LENGTH_SHORT)
-                    .show()
+                is Resource.Error -> {
+                    binding.progressBar.visibility=View.GONE;
+                    Toast.makeText(
+                        requireContext(),
+                        "Error status : ${it.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                is Resource.Loading -> {
+                    binding.progressBar.visibility=View.VISIBLE;
+                }
             }
         }
     }
+
 
     private fun studentRegister() {
         if (!validateUserEmail() xor !validateUserPassword())
@@ -73,7 +97,6 @@ class RegisterFragment : Fragment() {
         student.email = binding.textInputEmail.editText?.text.toString()
         student.password = binding.textInputPassword.editText?.text.toString();
         viewModel.register(student);
-
     }
 
 
