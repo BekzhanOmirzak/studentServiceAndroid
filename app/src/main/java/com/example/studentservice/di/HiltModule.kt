@@ -1,6 +1,7 @@
 package com.example.studentservice.di
 
 import androidx.annotation.ChecksSdkIntAtLeast
+import com.example.studentservice.remote.PostService
 import com.example.studentservice.remote.StudentService
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -22,8 +23,9 @@ object HiltModule {
 
     @Provides
     fun provideOkHttpClient() = OkHttpClient.Builder()
-        .readTimeout(60L,TimeUnit.SECONDS)
-        .writeTimeout(60L,TimeUnit.SECONDS)
+        .connectTimeout(60L, TimeUnit.SECONDS)
+        .readTimeout(60L, TimeUnit.SECONDS)
+        .writeTimeout(60L, TimeUnit.SECONDS)
         .build();
 
     @Provides
@@ -41,6 +43,11 @@ object HiltModule {
     @Provides
     @Singleton
     fun provideStudentService(retrofit: Retrofit) = retrofit.create(StudentService::class.java)
+
+    @Provides
+    @Singleton
+    fun providePostService(retrofit: Retrofit) = retrofit.create(PostService::class.java)
+
 
 
 

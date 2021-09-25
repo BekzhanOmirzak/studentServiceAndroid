@@ -93,7 +93,7 @@ class RegisterFragment : Fragment() {
         if (!validateUserEmail() xor !validateUserPassword())
             return
 
-        val student = Student();
+        val student = Student(0);
         student.email = binding.textInputEmail.editText?.text.toString()
         student.password = binding.textInputPassword.editText?.text.toString();
         viewModel.register(student);
